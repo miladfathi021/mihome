@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class AuthService
 {
@@ -17,11 +18,27 @@ class AuthService
 
         $user = User::create($data);
 
-        $user->workspaces()->create([
-            'name' => $data['workspace']
+        $workspace = $user->workspaces()->create([
+            'name' => $data['workspace'],
+            'owner_id' => $user->id
+        ]);
+
+        $user->update([
+            'active_workspace_id' => $workspace->id
         ]);
 
         return $user;
+    }
+
+    /**
+     * @param $user
+     *
+     * @return string
+     */
+    public function login($user) : string
+    {
+        Auth::login($user);
+        return $this->createToken($user);
     }
 
     /**

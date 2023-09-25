@@ -19,7 +19,7 @@ class SignupController extends ApiController
     {
         $user = $authService->createUser($request->all());
 
-        $token = $authService->createToken($user);
+        $token = $authService->login($user);
 
         return $this->responseOk([
             'token' => $token

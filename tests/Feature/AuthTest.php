@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Artisan;
@@ -14,7 +15,7 @@ class AuthTest extends TestCase
     use RefreshDatabase;
 
     /** @test **/
-    public function the_guest_can_create_a_new_account_with_email()
+    public function a_person_can_create_a_new_account_with_email()
     {
         $this->withoutExceptionHandling();
         Artisan::call('passport:install');
@@ -28,7 +29,6 @@ class AuthTest extends TestCase
         ];
 
         $this->assertDatabaseCount('users', 0);
-        $this->assertDatabaseCount('workspaces', 0);
 
         $this->postJson(route('signup'), $data)
             ->assertStatus(200)
@@ -43,17 +43,13 @@ class AuthTest extends TestCase
         $this->assertDatabaseHas('users', [
             'name' => $data['name'],
             'email' => $data['email'],
-            'phone' => null
-        ]);
-
-        $this->assertDatabaseCount('workspaces', 1);
-        $this->assertDatabaseHas('workspaces', [
-            'name' => $data['workspace']
+            'phone' => null,
+            'active_workspace_id' => Workspace::first()->id
         ]);
     }
 
     /** @test **/
-    public function the_guest_can_create_a_new_account_with_phone()
+    public function a_person_can_create_a_new_account_with_phone()
     {
         $this->withoutExceptionHandling();
         Artisan::call('passport:install');
@@ -480,5 +476,54 @@ class AuthTest extends TestCase
 
         $this->assertDatabaseCount('users', 0);
         $this->assertDatabaseCount('workspaces', 0);
+    }
+
+    /** @test **/
+    public function a_workspace_should_be_created_when_the_user_was_created()
+    {
+        $this->withoutExceptionHandling();
+        Artisan::call('passport:install');
+
+        $data = [
+            'name' => 'Milad Fathi',
+            'email' => 'miladfathi021@gmail.com',
+            'phone' => '',
+            'password' => 'password',
+            'workspace' => 'parsa'
+        ];
+
+        $this->assertDatabaseCount('workspaces', 0);
+
+        $this->postJson(route('signup'), $data)
+            ->assertStatus(200);
+
+        $this->assertDatabaseCount('workspaces', 1);
+        $this->assertDatabaseHas('workspaces', [
+            'name' => $data['workspace'],
+            'owner_id' => User::first()->id
+        ]);
+    }
+
+    /** @test **/
+    public function the_workspace_that_is_created_when_a_user_was_created_should_be_active()
+    {
+        $this->withoutExceptionHandling();
+        Artisan::call('passport:install');
+
+        $data = [
+            'name' => 'Milad Fathi',
+            'email' => 'miladfathi021@gmail.com',
+            'phone' => '',
+            'password' => 'password',
+            'workspace' => 'parsa'
+        ];
+
+        $this->postJson(route('signup'), $data)
+            ->assertStatus(200);
+
+        tap(User::all(), function ($users) {
+            $this->assertCount(1, $users);
+            $this->assertEquals($users[0]->activeWorkspace()->id, Workspace::first()->id);
+        });
     }
 }

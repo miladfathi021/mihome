@@ -22,6 +22,8 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'active_workspace_id',
+        'phone_verified_at'
     ];
 
     /**
@@ -41,14 +43,28 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'phone_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function workspaces() : \Illuminate\Database\Eloquent\Relations\HasMany
+    public function workspaces() : \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasMany(Workspace::class, 'user_id');
+        return $this->belongsToMany(
+            Workspace::class,
+            'user_workspace',
+            'user_id',
+            'workspace_id'
+        );
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|null
+     */
+    public function activeWorkspace() : \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|null
+    {
+        return $this->workspaces()->find($this->active_workspace_id);
     }
 }

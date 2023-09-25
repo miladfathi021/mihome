@@ -14,11 +14,12 @@ return new class extends Migration
         Schema::create('workspaces', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id')
+            $table->foreignId('owner_id')
                 ->constrained('users')
                 ->cascadeOnDelete();
 
             $table->string('name');
+
             $table->timestamps();
         });
     }

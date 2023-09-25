@@ -17,8 +17,15 @@ return new class extends Migration
             $table->string('email')->unique()->nullable()->index();
             $table->string('phone')->unique()->nullable()->index();
             $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('phone_verified_at')->nullable();
             $table->string('password');
+
             $table->rememberToken();
+            $table->foreignId('active_workspace_id')
+                ->nullable()
+                ->constrained('workspaces')
+                ->cascadeOnDelete();
+
             $table->timestamps();
         });
     }

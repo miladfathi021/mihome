@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -382,5 +381,162 @@ class AuthTest extends TestCase
             $this->assertCount(1, $users);
             $this->assertEquals($users[0]->activeWorkspace()->id, Workspace::first()->id);
         });
+    }
+
+    /** @test **/
+    public function user_can_login_with_email()
+    {
+        $this->withoutExceptionHandling();
+        Artisan::call('passport:install');
+
+        $user = User::factory()->has(Workspace::factory())->create([
+            'phone' => '09215420796',
+        ]);
+
+        $data = [
+            'phone' => '09215420796',
+            'password' => 'password'
+        ];
+
+        $this->postJson(route('signin'), $data)
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'token'
+                ],
+                'message'
+            ]);
+
+        $this->assertEquals(auth()->id(), $user->id);
+    }
+
+    /** @test **/
+    public function the_phone_is_required_for_login()
+    {
+        $user = User::factory()->has(Workspace::factory())->create([
+            'phone' => '09215420796',
+        ]);
+
+        $data = [
+            'phone' => '',
+            'password' => 'password',
+        ];
+
+        $this->postJson(route('signin'), $data)
+            ->assertStatus(400);
+
+        $this->assertNotEquals(auth()->id(), $user->id);
+    }
+
+    /** @test **/
+    public function the_phone_must_be_string_for_login()
+    {
+        $user = User::factory()->has(Workspace::factory())->create([
+            'phone' => '09215420796',
+        ]);
+
+        $data = [
+            'phone' => 654,
+            'password' => 'password',
+        ];
+
+        $this->postJson(route('signin'), $data)
+            ->assertStatus(400);
+
+        $this->assertNotEquals(auth()->id(), $user->id);
+    }
+
+    /** @test **/
+    public function the_password_is_required_for_login()
+    {
+        $user = User::factory()->has(Workspace::factory())->create([
+            'phone' => '09215420796',
+        ]);
+
+        $data = [
+            'phone' => '09215420796',
+            'password' => '',
+        ];
+
+        $this->postJson(route('signin'), $data)
+            ->assertStatus(400);
+
+        $this->assertNotEquals(auth()->id(), $user->id);
+    }
+
+    /** @test **/
+    public function the_password_must_be_string_for_login()
+    {
+        $user = User::factory()->has(Workspace::factory())->create([
+            'phone' => '09215420796',
+        ]);
+
+        $data = [
+            'phone' => '09215420796',
+            'password' => 1234,
+        ];
+
+        $this->postJson(route('signin'), $data)
+            ->assertStatus(400);
+
+        $this->assertNotEquals(auth()->id(), $user->id);
+    }
+
+    /** @test **/
+    public function the_password_must_be_greater_than_5_for_login()
+    {
+        $user = User::factory()->has(Workspace::factory())->create([
+            'phone' => '09215420796',
+        ]);
+
+        $data = [
+            'phone' => '09215420796',
+            'password' => '12345',
+        ];
+
+        $this->postJson(route('signin'), $data)
+            ->assertStatus(400);
+
+        $this->assertNotEquals(auth()->id(), $user->id);
+    }
+
+    /** @test **/
+    public function the_password_must_not_be_greater_than_255_for_login()
+    {
+        $user = User::factory()->has(Workspace::factory())->create([
+            'phone' => '09215420796',
+        ]);
+
+        $data = [
+            'phone' => '09215420796',
+            'password' => Str::random(256),
+        ];
+
+        $this->postJson(route('signin'), $data)
+            ->assertStatus(400);
+
+        $this->assertNotEquals(auth()->id(), $user->id);
+    }
+
+    /** @test **/
+    public function user_can_not_login_with_wrong_credential()
+    {
+        $user = User::factory()->has(Workspace::factory())->create([
+            'phone' => '09215420796',
+        ]);
+
+        $data = [
+            'phone' => '09215420796',
+            'password' => '123456',
+        ];
+
+        $this->postJson(route('signin'), $data)
+            ->assertStatus(401)
+            ->assertJson([
+                'data' => '',
+                'message' => 'These credentials do not match our records.'
+            ]);
+
+        $this->assertNotEquals(auth()->id(), $user->id);
     }
 }

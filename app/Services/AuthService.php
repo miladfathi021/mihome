@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Auth;
 
 class AuthService
@@ -46,7 +47,7 @@ class AuthService
      *
      * @return string
      */
-    public function createToken(User $user) : string
+    public function createToken(User|Authenticatable $user) : string
     {
         return $user->createToken('API Token')->accessToken;
     }

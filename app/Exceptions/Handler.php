@@ -26,5 +26,11 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+
+        $this->renderable(function (Throwable $e) {
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                return throw (new ValidationException($e))->setData($e->errors());
+            }
+        });
     }
 }

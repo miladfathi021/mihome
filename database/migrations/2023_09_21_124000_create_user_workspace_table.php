@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('user_workspace', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('phone')->unique()->nullable()->index();
-            $table->timestamp('phone_verified_at')->nullable();
-            $table->string('password');
 
-            $table->rememberToken();
-            $table->foreignId('active_workspace_id')
-                ->nullable()
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+            $table->foreignId('workspace_id')
                 ->constrained('workspaces')
                 ->cascadeOnDelete();
 
@@ -33,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('user_workspace');
     }
 };

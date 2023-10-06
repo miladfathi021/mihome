@@ -8,7 +8,8 @@ class ValidationException extends CustomException
     {
         return response()->json([
             'success' => false,
-            'errors' => $this->data
+            'errors' => $this->data,
+            'message' => 'Given data is invalid'
         ], 400);
     }
 }

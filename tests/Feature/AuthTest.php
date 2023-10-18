@@ -220,7 +220,7 @@ class AuthTest extends TestCase
     public function the_password_must_be_greater_than_5_chars()
     {
         $data = [
-            'name' => 'Milad Fayhi',
+            'name' => 'Milad Fathi',
             'phone' => '09215420796',
             'password' => 'pa',
             'workspace' => 'parsa'
@@ -300,7 +300,7 @@ class AuthTest extends TestCase
     public function the_workspace_must_be_greater_than_2_chars()
     {
         $data = [
-            'name' => 'Milad Fayhi',
+            'name' => 'Milad Fathi',
             'phone' => '09215420796',
             'password' => 'password',
             'workspace' => 'pa'
@@ -317,13 +317,13 @@ class AuthTest extends TestCase
     }
 
     /** @test **/
-    public function the_workspace_must_not_be_greater_than_255_chars()
+    public function the_workspace_must_not_be_greater_than_100_chars()
     {
         $data = [
-            'name' => Str::random(256),
+            'name' => 'Milad Fathi',
             'phone' => '09215420796',
             'password' => 'password',
-            'workspace' => Str::random(256)
+            'workspace' => Str::random(101)
         ];
 
         $this->assertDatabaseCount('users', 0);
@@ -379,7 +379,7 @@ class AuthTest extends TestCase
 
         tap(User::all(), function ($users) {
             $this->assertCount(1, $users);
-            $this->assertEquals($users[0]->activeWorkspace()->id, Workspace::first()->id);
+            $this->assertEquals($users[0]->activeWorkspace->id, Workspace::first()->id);
         });
     }
 

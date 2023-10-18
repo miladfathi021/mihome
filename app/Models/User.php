@@ -59,10 +59,35 @@ class User extends Authenticatable
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|null
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function activeWorkspace() : \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|null
+    public function activeWorkspace() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->workspaces()->find($this->active_workspace_id);
+        return $this->belongsTo(Workspace::class, 'active_workspace_id');
+    }
+
+    /**
+     * @param \App\Models\Workspace $workspace
+     *
+     * @return bool
+     */
+    public function isPartOfWorkspace(Workspace $workspace) : bool
+    {
+        return $this->workspaces()
+            ->where('user_id', auth()->id())
+            ->where('workspace_id', $workspace->id)
+            ->exists();
+    }
+
+    /**
+     * @param \App\Models\Workspace $workspace
+     *
+     * @return void
+     */
+    public function toggleWorkspace(Workspace $workspace)
+    {
+        auth()->user()->update([
+            'active_workspace_id' => $workspace->id
+        ]);
     }
 }

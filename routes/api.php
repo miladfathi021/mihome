@@ -15,4 +15,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => '/v1'], function () {
     require('Auth/auth.php');
+    require('Workspace/workspace.php');
+    require('Workspace/user.php');
 });

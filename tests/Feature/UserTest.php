@@ -33,7 +33,7 @@ class UserTest extends TestCase
 
         $this->assertDatabaseCount('users', 1);
 
-        $this->postJson(route('workspace.users.store'), $data)
+        $this->postJson(route('workspace.invitations.store'), $data)
             ->assertStatus(200);
 
         $this->assertDatabaseCount('users', 2);

@@ -10,4 +10,12 @@ class Workspace extends Model
     use HasFactory;
 
     protected $fillable = ['owner_id', 'name'];
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function invitations() : \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Invitation::class, 'workspace_id');
+    }
 }
